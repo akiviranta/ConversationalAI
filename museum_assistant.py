@@ -5,33 +5,21 @@ Orchestrates ASR, LLM, and TTS components.
 import os
 import sys
 import sounddevice as sd
-from vosk import Model # Keep Model import here for loading
+
 
 # Import functions from our new modules
-from asr_client import listen_until_pause, callback, q # Import queue and callback too
+from asr_client import listen_until_pause, callback, callback, q
 from tts_client import speak
 from ollama_client import query_ollama
 
 # Constants remain here
-MODEL_PATH     = "asr_model"
 SAMPLE_RATE    = 16000
-PAUSE_TIMEOUT  = 2.0 # seconds of silence to trigger LLM
+PAUSE_TIMEOUT  = 1.0 # seconds of silence to trigger LLM
 MODEL_NAME = "gemma3:1b-it-qat"
 
 
 if __name__ == "__main__":
-    # --- Vosk Model Loading ---
-    if not os.path.exists(MODEL_PATH):
-        print(f"Please download the Vosk model into '{MODEL_PATH}'")
-        sys.exit(1)
-    try:
-        model = Model(MODEL_PATH)
-        print("Vosk model loaded successfully.")
-    except Exception as e:
-        print(f"Error loading Vosk model from {MODEL_PATH}: {e}", file=sys.stderr)
-        sys.exit(1)
-
-    # --- Conversation History ---
+    
     conversation_history = []
 
     # --- Audio Stream Setup ---
@@ -58,7 +46,7 @@ if __name__ == "__main__":
                 # ——— TURN 1: Listening ———
                 # Stream is managed by the 'with' block, just call listen
                 # Pass the loaded model, sample rate, and timeout
-                user_input = listen_until_pause(model, SAMPLE_RATE, PAUSE_TIMEOUT)
+                user_input = listen_until_pause(SAMPLE_RATE)
 
                 if not user_input: # Handle case where listening might fail or return empty
                     print("No input detected.")
